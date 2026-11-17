@@ -1,4 +1,4 @@
-# A simple Nextcloud instances versions monitoring page
+# Nextcloud Version Monitor Dashboard
 
 ## Description : 
 Simple page for displaying and tracking versions of several Nextcloud instances.
