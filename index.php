@@ -11,27 +11,20 @@ if (!empty($cfg['timezone'])) {
     date_default_timezone_set($cfg['timezone']);
 }
 
-// Session: only used to remember the visitor's language between pages.
-if (session_status() === PHP_SESSION_NONE) {
-    session_name('nivmp_session');
-    session_set_cookie_params([
-        'lifetime' => 0,
+// Language: ?lang= (whitelisted), then the visitor's 1-year cookie, then
+// config, then English. The cookie is only used to remember the language.
+$langCode = 'en';
+if (isset($_GET['lang']) && is_string($_GET['lang']) && isset($langs[$_GET['lang']])) {
+    $langCode = $_GET['lang'];
+    setcookie('nivmp_lang', $langCode, [
+        'expires'  => time() + 365 * 24 * 3600,
         'path'     => '/',
         'secure'   => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
         'httponly' => true,
         'samesite' => 'Lax',
     ]);
-    @session_start();
-}
-
-// Language: ?lang= (whitelisted, remembered in the session), then the
-// session value, then config, then English.
-$langCode = 'en';
-if (isset($_GET['lang']) && is_string($_GET['lang']) && isset($langs[$_GET['lang']])) {
-    $langCode = $_GET['lang'];
-    $_SESSION['nivmp_lang'] = $langCode;
-} elseif (!empty($_SESSION['nivmp_lang']) && isset($langs[$_SESSION['nivmp_lang']])) {
-    $langCode = $_SESSION['nivmp_lang'];
+} elseif (isset($_COOKIE['nivmp_lang']) && is_string($_COOKIE['nivmp_lang']) && isset($langs[$_COOKIE['nivmp_lang']])) {
+    $langCode = $_COOKIE['nivmp_lang'];
 } elseif (isset($cfg['lang']) && isset($langs[$cfg['lang']])) {
     $langCode = $cfg['lang'];
 }

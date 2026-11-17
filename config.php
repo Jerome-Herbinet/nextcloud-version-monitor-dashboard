@@ -6,7 +6,8 @@ return [
 
     // Default interface language: 'en', 'fr', 'es', 'it', 'de' or 'pt' (see lang.php).
     // Visitors can switch at any time with the links in the header (?lang=xx); their
-    // choice is then remembered in their session and takes precedence over this setting.
+    // choice is then remembered for one year in their browser (cookie) and takes
+    // precedence over this setting.
     'lang' => 'en',
 
     // Nextcloud instances to monitor. Use one of these forms:

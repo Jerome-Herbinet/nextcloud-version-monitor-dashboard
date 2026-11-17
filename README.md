@@ -22,7 +22,7 @@ Languages: PHP, HTML, CSS, vanilla JavaScript (no jQuery, no database).
 
 ## Languages
 
-The interface is available in **English, French, Spanish, Italian, German and Portuguese**. A switcher in the page header (`EN · FR · ES · IT · DE · PT`) reloads the page in the chosen language (`?lang=xx`), and the choice is remembered in the visitor's session so it survives navigation and reloads. The default language is set in `config.php`.
+The interface is available in **English, French, Spanish, Italian, German and Portuguese**. A switcher in the page header (`EN · FR · ES · IT · DE · PT`) reloads the page in the chosen language (`?lang=xx`), and the choice is remembered for one year in the visitor's browser (a small `HttpOnly` cookie), so it survives navigation, reloads and future visits. The default language is set in `config.php`.
 
 To add another language, copy one block in `lang.php` and translate it: the legend and the switcher pick it up automatically.
 
@@ -50,9 +50,9 @@ To add another language, copy one block in `lang.php` and translate it: the lege
 ```
 
 Other settings in `config.php`: default interface language (`en`, `fr`, `es`, `it`, `de` or `pt`; visitors can
-switch in the header and the choice is kept in their session), timeouts, TLS verification, cache durations,
-the orange/red warning thresholds (30 / 15 days by default) and the support-date sources. Wordings live in
-`lang.php`; copy a block to add a language.
+switch in the header and the choice is kept for one year in their browser), timeouts, TLS verification, cache
+durations, the orange/red warning thresholds (30 / 15 days by default) and the support-date sources. Wordings
+live in `lang.php`; copy a block to add a language.
 
 ## How support dates are found
 

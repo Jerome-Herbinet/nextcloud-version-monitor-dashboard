@@ -6,7 +6,7 @@
 - **Legend and help**: a collapsible section below the table explains the dashboard tiles, every table column, every possible state (and the reasons why an instance can be unreachable), the editions, the "Maintained" values, the colour/symbol codes and a few terms (status.php, EOL, major version, ≈). Pure HTML (`<details>`), works without JavaScript.
 - **Six interface languages**: English, French, Spanish, Italian, German and Portuguese (`lang.php`).
 - **Language switcher** in the page header (`EN · FR · ES · IT · DE · PT`), also usable as simple links (`?lang=de`).
-- The chosen language is **remembered in the visitor's session** (PHP session cookie, `HttpOnly`, `SameSite=Lax`, `Secure` over HTTPS), so the page no longer falls back to English on every visit. The default language remains configurable in `config.php`.
+- The chosen language is **remembered for one year in the visitor's browser** (dedicated `nivmp_lang` cookie, `HttpOnly`, `SameSite=Lax`, `Secure` over HTTPS), so the page no longer falls back to English on every visit. The default language remains configurable in `config.php`.
 
 ### Changed
 - Version bumped to 0.2.0 (also in the HTTP `User-Agent`).
