@@ -1,23 +1,89 @@
-# Nextcloud Version Monitor Dashboard
+# A simple Nextcloud instances versions monitoring page
 
-## Description : 
+## Description
+
 Simple page for displaying and tracking versions of several Nextcloud instances.
-Used languages will be : PHP HTML CSS JAVASCRIPT JQUERY
-This program fetches the Nextcloud status.php content and compares it with Nextcloud versions and their EOL dates, stored in an array in the php file.
 
-[Capture vidéo du 2023-06-19 21-52-50.webm](https://github.com/Jerome-Herbinet/Nextcloud-Instances-Versions-Monitoring-Page/assets/33763786/9ab08e85-68cd-41f8-ae0a-14ed5faf96ef)
+For each instance it reads the public `status.php` file, then shows:
 
-## Restrictions : 
-This program does not work : 
-- with "hidden" Nextcloud instances (and therefore only accessible via a VPN, for example)
-- with Nextcloud instances whose access to status.php has been blocked.
-- with Owncloud instances (may work partially because of a small field label difference in the status.php file). See developpment roadmap.
+- the **state** (online, maintenance mode, database upgrade needed, not installed, unreachable and why),
+- the **version** (and the patch release you should update to),
+- the **edition** (standard, extended support, or Enterprise),
+- whether the major version is **still maintained**, its **support end date** and the number of days left or elapsed.
 
-## Installation : 
-1. Upload all the files behind a regular web environment and "https://..." URL. All is static, so you don't need any database.
-2. Inside the index.php file, fill out the Nextcloud instances domains list and the additionnal major Nextcloud version + EOL date, if missing. You can also change wordings with better ones or you can simply translate them.
+Support end dates are **fetched live** from the official Nextcloud
+[Maintenance and Release Schedule](https://github.com/nextcloud/server/wiki/Maintenance-and-Release-Schedule)
+(with [endoflife.date](https://endoflife.date/nextcloud) as a second source and a built-in table as a last resort),
+so you no longer have to edit a table when a new major version is released.
 
-## Developpent roadmap : 
-- Better UI and branding
-- Responsive design
-- Display "Entreprise" version
+Languages: PHP, HTML, CSS, vanilla JavaScript (no jQuery, no database).
+
+## Demo
+
+<https://www.herbinet.fr/NIVMP-demo/>
+
+## Requirements
+
+- A web server with PHP. The code is written to stay compatible with PHP 7.4 and newer, but has only been tested with PHP 8.3. The `curl` extension is recommended: with it, all instances are queried in parallel.
+- Outbound HTTPS access from the server to your instances, to `raw.githubusercontent.com` and (optionally) `endoflife.date`.
+- A writable temporary directory (used for a small cache; the page still works without it).
+
+## Installation
+
+1. Upload all the files behind a regular web environment and an `https://...` URL. There is no database.
+2. Open `config.php` and list your instances (domain names, without `https://`). Everything else is optional.
+
+```php
+'instances' => [
+    'cloud.example.org',
+    'example.org/nextcloud',                                   // installed in a sub-folder
+    'intranet.example.org' => ['name' => 'Intranet', 'enterprise' => true],
+],
+```
+
+Other settings in `config.php`: interface language (`en` or `fr`, also selectable with `?lang=fr`), timeouts,
+TLS verification, cache durations, the orange/red warning thresholds (30 / 15 days by default) and the
+support-date sources. Wordings live in `lang.php`; copy a block to add a language.
+
+## How support dates are found
+
+1. The raw markdown of the Nextcloud wiki page is downloaded and parsed (cached for 6 hours).
+2. If that fails, the endoflife.date API is tried.
+3. If that fails too, the last cached copy is used and flagged as such in the page footer.
+4. With no cache at all, the `fallback` table of `config.php` is used.
+
+The wiki gives an exact end date only for the versions that are still supported. For older ones it gives a month,
+and the last day of that month is used (shown with a leading `≈`).
+
+## About the "Enterprise" display
+
+`status.php` always returns an empty `edition` field, so an Enterprise edition **cannot be detected directly**. This page therefore shows:
+
+- **Extended support** when `status.php` reports `extendedSupport: true` (this comes from the instance's support subscription),
+- **Enterprise** when you flag the instance yourself with `'enterprise' => true` in `config.php`,
+- **Standard** otherwise. An Enterprise instance that does not report extended support will show as Standard unless you flag it.
+
+An instance past the community support end date but reporting extended support is shown as "Extended" rather than "No".
+
+## Restrictions
+
+This program does not work:
+
+- with "hidden" Nextcloud instances (only reachable through a VPN, for example) unless the web server running this page can reach them,
+- with Nextcloud instances whose access to `status.php` has been blocked.
+
+ownCloud instances are recognised from their product name and shown without support dates.
+
+## Security notes
+
+- The instance list is trusted configuration: never build it from user input.
+- `status.php` is public and reveals the exact version of an instance. This page is sent with `noindex` headers, but you may still want to protect it (HTTP authentication, IP restriction) if it lists instances you do not want to advertise.
+- Data coming from the monitored instances is escaped before display, responses are size-limited, and only `http(s)` is followed.
+- The page sends a strict Content-Security-Policy: inline scripts and styles are not allowed, so keep custom code in `scripts.js` / `styles.css`.
+
+## Development roadmap
+
+- JSON output for use with Uptime Kuma, Nagios or Zabbix
+- Notifications before a support end date
+
+See [CHANGELOG.md](CHANGELOG.md) for what is already done.

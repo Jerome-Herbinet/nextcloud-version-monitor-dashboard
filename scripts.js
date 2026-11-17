@@ -1,178 +1,112 @@
-// Filter table
+/* NIVMP - Nextcloud Instances Versions Monitoring Page
+   Filter + sortable table, no dependency. The page stays fully readable without JavaScript. */
+(function () {
+	'use strict';
 
-function filterTable() {
-    var input, filter, table, tr, td, cell, i, j;
-    input = document.getElementById("myInput");
-    filter = input.value.toUpperCase();
-    table = document.getElementById("myTable");
-    tr = table.getElementsByTagName("tr");
-    for (i = 1; i < tr.length; i++) {
-        tr[i].style.display = "none";
-        td = tr[i].getElementsByTagName("td");
-        for (var j = 0; j < td.length; j++) {
-            cell = tr[i].getElementsByTagName("td")[j];
-            if (cell) {
-                if (cell.innerHTML.toUpperCase().indexOf(filter) > -1) {
-                    tr[i].style.display = "";
-                    break;
-                }
-            }
-        }
-    }
-}
+	var table = document.getElementById('instances');
+	if (!table || !table.tBodies.length) { return; }
 
-// Sort table
+	var tbody = table.tBodies[0];
+	var headers = Array.prototype.slice.call(table.tHead.rows[0].cells);
+	var filter = document.getElementById('filter');
+	var empty = document.getElementById('no-results');
+	var sortSelect = document.getElementById('sort');
+	var sortLabel = sortSelect ? sortSelect.parentNode : null;
 
-'use strict';
+	function rows() {
+		return Array.prototype.slice.call(tbody.rows);
+	}
 
-class SortableTable {
-    constructor(tableNode) {
-        this.tableNode = tableNode;
+	/* ---------- Filter ---------- */
+	function applyFilter() {
+		var needle = (filter.value || '').trim().toLowerCase();
+		var shown = 0;
+		rows().forEach(function (row) {
+			var match = needle === '' || row.textContent.toLowerCase().indexOf(needle) !== -1;
+			row.hidden = !match;
+			if (match) { shown++; }
+		});
+		if (empty) { empty.hidden = shown !== 0; }
+	}
 
-        this.columnHeaders = tableNode.querySelectorAll('thead th');
+	if (filter) {
+		filter.addEventListener('input', applyFilter);
+	}
 
-        this.sortColumns = [];
+	/* ---------- Sort ---------- */
+	// Cells carry a data-sort value: numeric columns compare numbers,
+	// the others compare text. Empty values (N/A) always go last.
+	function sortBy(col, direction) {
+		var numeric = headers[col].getAttribute('data-type') === 'num';
+		var factor = direction === 'ascending' ? 1 : -1;
 
-        for (var i = 0; i < this.columnHeaders.length; i++) {
-            var ch = this.columnHeaders[i];
-            var buttonNode = ch.querySelector('button');
-            if (buttonNode) {
-                this.sortColumns.push(i);
-                buttonNode.setAttribute('data-column-index', i);
-                buttonNode.addEventListener('click', this.handleClick.bind(this));
-            }
-        }
+		var items = rows().map(function (row, index) {
+			var raw = row.cells[col].getAttribute('data-sort');
+			if (raw === null) { raw = row.cells[col].textContent.trim().toLowerCase(); }
+			return { row: row, index: index, raw: raw, empty: raw === '' };
+		});
 
-        this.optionCheckbox = document.querySelector(
-            'input[type="checkbox"][value="show-unsorted-icon"]'
-        );
+		items.sort(function (a, b) {
+			if (a.empty !== b.empty) { return a.empty ? 1 : -1; }
+			var result = 0;
+			if (!a.empty) {
+				if (numeric) {
+					result = (parseFloat(a.raw) - parseFloat(b.raw)) * factor;
+				} else {
+					result = a.raw.localeCompare(b.raw, undefined, { numeric: true }) * factor;
+				}
+			}
+			return result || a.index - b.index;
+		});
 
-        if (this.optionCheckbox) {
-            this.optionCheckbox.addEventListener(
-                'change',
-                this.handleOptionChange.bind(this)
-            );
-            if (this.optionCheckbox.checked) {
-                this.tableNode.classList.add('show-unsorted-icon');
-            }
-        }
-    }
+		items.forEach(function (item) { tbody.appendChild(item.row); });
 
-    setColumnHeaderSort(columnIndex) {
-        if (typeof columnIndex === 'string') {
-            columnIndex = parseInt(columnIndex);
-        }
+		headers.forEach(function (th, i) {
+			if (i === col) {
+				th.setAttribute('aria-sort', direction);
+			} else {
+				th.removeAttribute('aria-sort');
+			}
+		});
 
-        for (var i = 0; i < this.columnHeaders.length; i++) {
-            var ch = this.columnHeaders[i];
-            var buttonNode = ch.querySelector('button');
-            if (i === columnIndex) {
-                var value = ch.getAttribute('aria-sort');
-                if (value === 'descending') {
-                    ch.setAttribute('aria-sort', 'ascending');
-                    this.sortColumn(
-                        columnIndex,
-                        'ascending',
-                        ch.classList.contains('num')
-                    );
-                } else {
-                    ch.setAttribute('aria-sort', 'descending');
-                    this.sortColumn(
-                        columnIndex,
-                        'descending',
-                        ch.classList.contains('num')
-                    );
-                }
-            } else {
-                if (ch.hasAttribute('aria-sort') && buttonNode) {
-                    ch.removeAttribute('aria-sort');
-                }
-            }
-        }
-    }
+		if (sortSelect) { sortSelect.value = col + ':' + direction; }
+	}
 
-    sortColumn(columnIndex, sortValue, isNumber) {
-        function compareValues(a, b) {
-            if (sortValue === 'ascending') {
-                if (a.value === b.value) {
-                    return 0;
-                } else {
-                    if (isNumber) {
-                        return a.value - b.value;
-                    } else {
-                        return a.value < b.value ? -1 : 1;
-                    }
-                }
-            } else {
-                if (a.value === b.value) {
-                    return 0;
-                } else {
-                    if (isNumber) {
-                        return b.value - a.value;
-                    } else {
-                        return a.value > b.value ? -1 : 1;
-                    }
-                }
-            }
-        }
+	headers.forEach(function (th, col) {
+		var button = th.querySelector('button');
+		if (!button) { return; }
+		button.addEventListener('click', function () {
+			var next = th.getAttribute('aria-sort') === 'ascending' ? 'descending' : 'ascending';
+			sortBy(col, next);
+		});
+	});
 
-        if (typeof isNumber !== 'boolean') {
-            isNumber = false;
-        }
+	/* ---------- Sort menu (used on phones, where headers are hidden) ---------- */
+	if (sortSelect && sortLabel) {
+		var asc = sortLabel.getAttribute('data-asc') || 'asc';
+		var desc = sortLabel.getAttribute('data-desc') || 'desc';
 
-        var tbodyNode = this.tableNode.querySelector('tbody');
-        var rowNodes = [];
-        var dataCells = [];
+		var placeholder = document.createElement('option');
+		placeholder.value = '';
+		placeholder.textContent = '—';
+		sortSelect.appendChild(placeholder);
 
-        var rowNode = tbodyNode.firstElementChild;
+		headers.forEach(function (th, col) {
+			var button = th.querySelector('button');
+			if (!button) { return; }
+			var name = button.firstChild.textContent.trim();
+			[['ascending', asc], ['descending', desc]].forEach(function (pair) {
+				var option = document.createElement('option');
+				option.value = col + ':' + pair[0];
+				option.textContent = name + ' (' + pair[1] + ')';
+				sortSelect.appendChild(option);
+			});
+		});
 
-        var index = 0;
-        while (rowNode) {
-            rowNodes.push(rowNode);
-            var rowCells = rowNode.querySelectorAll('th, td');
-            var dataCell = rowCells[columnIndex];
-
-            var data = {};
-            data.index = index;
-            data.value = dataCell.textContent.toLowerCase().trim();
-            if (isNumber) {
-                data.value = parseFloat(data.value);
-            }
-            dataCells.push(data);
-            rowNode = rowNode.nextElementSibling;
-            index += 1;
-        }
-
-        dataCells.sort(compareValues);
-
-        while (tbodyNode.firstChild) {
-            tbodyNode.removeChild(tbodyNode.lastChild);
-        }
-
-        for (var i = 0; i < dataCells.length; i += 1) {
-            tbodyNode.appendChild(rowNodes[dataCells[i].index]);
-        }
-    }
-
-    handleClick(event) {
-        var tgt = event.currentTarget;
-        this.setColumnHeaderSort(tgt.getAttribute('data-column-index'));
-    }
-
-    handleOptionChange(event) {
-        var tgt = event.currentTarget;
-
-        if (tgt.checked) {
-            this.tableNode.classList.add('show-unsorted-icon');
-        } else {
-            this.tableNode.classList.remove('show-unsorted-icon');
-        }
-    }
-}
-
-window.addEventListener('load', function() {
-    var sortableTables = document.querySelectorAll('table.sortable');
-    for (var i = 0; i < sortableTables.length; i++) {
-        new SortableTable(sortableTables[i]);
-    }
-});
+		sortSelect.addEventListener('change', function () {
+			if (!sortSelect.value) { return; }
+			var parts = sortSelect.value.split(':');
+			sortBy(parseInt(parts[0], 10), parts[1]);
+		});
+	}
+})();
