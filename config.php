@@ -4,7 +4,9 @@
  */
 return [
 
-    // Interface language: 'en' or 'fr' (see lang.php). Visitors can override with ?lang=fr
+    // Default interface language: 'en', 'fr', 'es', 'it', 'de' or 'pt' (see lang.php).
+    // Visitors can switch at any time with the links in the header (?lang=xx); their
+    // choice is then remembered in their session and takes precedence over this setting.
     'lang' => 'en',
 
     // Nextcloud instances to monitor. Use one of these forms:
@@ -61,7 +63,7 @@ return [
         'connect_timeout' => 4,
         'verify_tls'      => true,    // set to false only for internal instances with self-signed certificates
         'max_bytes'       => 262144,  // responses larger than this are rejected
-        'user_agent'      => 'NIVMP/0.1.3 (+https://github.com/Jerome-Herbinet/Nextcloud-Instances-Versions-Monitoring-Page)',
+        'user_agent'      => 'NIVMP/0.2.0 (+https://github.com/Jerome-Herbinet/Nextcloud-Instances-Versions-Monitoring-Page)',
     ],
 
     // Cache for instance status (avoids hammering your instances on every page view).

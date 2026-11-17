@@ -5,7 +5,7 @@
  * Written to stay compatible with PHP >= 7.4 (curl extension recommended).
  */
 
-const NIVMP_VERSION = '0.1.3';
+const NIVMP_VERSION = '0.2.0';
 
 /* ------------------------------------------------------------------ */
 /* Small helpers                                                       */

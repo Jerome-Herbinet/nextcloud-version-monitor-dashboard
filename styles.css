@@ -72,12 +72,20 @@ a:hover { text-decoration-thickness: 2px; }
 
 /* ---------- Header ---------- */
 .site-header { background: var(--brand); color: var(--brand-text); }
-.site-header__inner { display: flex; align-items: center; gap: 14px; padding-top: 18px; padding-bottom: 18px; }
+.site-header__inner { display: flex; align-items: center; gap: 14px; padding-top: 18px; padding-bottom: 18px; flex-wrap: wrap; }
 .site-header__title { margin: 0; font-size: 1.35rem; line-height: 1.25; font-weight: 650; }
 .site-header__subtitle { margin: 2px 0 0; font-size: .95rem; opacity: .9; }
 .brand__mark { flex: none; }
 .brand__bg { fill: rgba(255, 255, 255, .16); }
 .brand__pulse { fill: none; stroke: #fff; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- Language switcher ---------- */
+.lang-nav { margin-left: auto; display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: baseline; font-size: .85rem; }
+.lang-nav a,
+.lang-nav__current { color: var(--brand-text); text-decoration: none; padding: 2px 3px; }
+.lang-nav a { opacity: .8; }
+.lang-nav a:hover { opacity: 1; text-decoration: underline; text-underline-offset: 3px; }
+.lang-nav__current { font-weight: 700; opacity: 1; border-bottom: 2px solid currentColor; }
 
 main.wrap { padding-top: 20px; padding-bottom: 8px; }
 
@@ -198,6 +206,40 @@ table.sortable tbody th a:hover { color: var(--link); text-decoration-color: cur
 .days--crit { color: var(--crit-fg); }
 .days--info { color: var(--info-fg); }
 .days--muted { color: var(--text-muted); }
+
+/* ---------- Legend ---------- */
+.legend {
+	margin-top: 16px;
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: 12px;
+	box-shadow: var(--shadow);
+}
+.legend > summary {
+	cursor: pointer;
+	padding: 12px 16px;
+	font-weight: 600;
+	color: var(--link);
+	user-select: none;
+}
+.legend > summary:hover { text-decoration: underline; text-underline-offset: 3px; }
+.legend[open] > summary { border-bottom: 1px solid var(--border); }
+.legend__grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+	gap: 0 32px;
+	padding: 4px 16px 16px;
+}
+.legend__section h2 {
+	margin: 14px 0 4px;
+	font-size: .8rem;
+	text-transform: uppercase;
+	letter-spacing: .04em;
+	color: var(--text-muted);
+}
+.legend dl { margin: 0; }
+.legend dt { margin-top: 8px; font-weight: 600; }
+.legend dd { margin: 0; color: var(--text-muted); font-size: .92rem; overflow-wrap: anywhere; }
 
 /* ---------- Footer ---------- */
 .site-footer { margin-top: 20px; padding: 8px 0 32px; color: var(--text-muted); font-size: .85rem; }

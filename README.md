@@ -16,7 +16,15 @@ Support end dates are **fetched live** from the official Nextcloud
 (with [endoflife.date](https://endoflife.date/nextcloud) as a second source and a built-in table as a last resort),
 so you no longer have to edit a table when a new major version is released.
 
+A collapsible **legend** below the table explains the dashboard, every column, every possible value (states, editions, "Maintained"), the colour/symbol codes and a few terms.
+
 Languages: PHP, HTML, CSS, vanilla JavaScript (no jQuery, no database).
+
+## Languages
+
+The interface is available in **English, French, Spanish, Italian, German and Portuguese**. A switcher in the page header (`EN · FR · ES · IT · DE · PT`) reloads the page in the chosen language (`?lang=xx`), and the choice is remembered in the visitor's session so it survives navigation and reloads. The default language is set in `config.php`.
+
+To add another language, copy one block in `lang.php` and translate it: the legend and the switcher pick it up automatically.
 
 ## Demo
 
@@ -41,9 +49,10 @@ Languages: PHP, HTML, CSS, vanilla JavaScript (no jQuery, no database).
 ],
 ```
 
-Other settings in `config.php`: interface language (`en` or `fr`, also selectable with `?lang=fr`), timeouts,
-TLS verification, cache durations, the orange/red warning thresholds (30 / 15 days by default) and the
-support-date sources. Wordings live in `lang.php`; copy a block to add a language.
+Other settings in `config.php`: default interface language (`en`, `fr`, `es`, `it`, `de` or `pt`; visitors can
+switch in the header and the choice is kept in their session), timeouts, TLS verification, cache durations,
+the orange/red warning thresholds (30 / 15 days by default) and the support-date sources. Wordings live in
+`lang.php`; copy a block to add a language.
 
 ## How support dates are found
 

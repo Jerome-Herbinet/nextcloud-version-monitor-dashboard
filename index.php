@@ -11,10 +11,27 @@ if (!empty($cfg['timezone'])) {
     date_default_timezone_set($cfg['timezone']);
 }
 
-// Language: ?lang= (whitelisted), then config, then English.
+// Session: only used to remember the visitor's language between pages.
+if (session_status() === PHP_SESSION_NONE) {
+    session_name('nivmp_session');
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path'     => '/',
+        'secure'   => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
+    @session_start();
+}
+
+// Language: ?lang= (whitelisted, remembered in the session), then the
+// session value, then config, then English.
 $langCode = 'en';
 if (isset($_GET['lang']) && is_string($_GET['lang']) && isset($langs[$_GET['lang']])) {
     $langCode = $_GET['lang'];
+    $_SESSION['nivmp_lang'] = $langCode;
+} elseif (!empty($_SESSION['nivmp_lang']) && isset($langs[$_SESSION['nivmp_lang']])) {
+    $langCode = $_SESSION['nivmp_lang'];
 } elseif (isset($cfg['lang']) && isset($langs[$cfg['lang']])) {
     $langCode = $cfg['lang'];
 }
@@ -52,6 +69,42 @@ $summary = [
     ['key' => 'attention',   'label' => nivmp_t('sum_attention'),   'class' => 'warn'],
     ['key' => 'critical',    'label' => nivmp_t('sum_critical'),    'class' => 'crit'],
     ['key' => 'unreachable', 'label' => nivmp_t('sum_unreachable'), 'class' => 'muted'],
+];
+
+// Legend contents (term key => explanation key).
+$legendCols = [
+    'col_instance' => 'legend_c_instance',
+    'col_state'    => 'legend_c_state',
+    'col_version'  => 'legend_c_version',
+    'col_edition'  => 'legend_c_edition',
+    'col_support'  => 'legend_c_support',
+    'col_eol'      => 'legend_c_eol',
+    'col_days'     => 'legend_c_days',
+];
+$legendStates = [
+    'state_online'        => 'legend_s_online',
+    'state_maintenance'   => 'legend_s_maintenance',
+    'state_upgrade'       => 'legend_s_upgrade',
+    'state_not_installed' => 'legend_s_not_installed',
+    'state_unreachable'   => 'legend_s_unreachable',
+];
+$legendEditions = [
+    'ed_standard'   => 'ed_standard_tip',
+    'ed_extended'   => 'ed_extended_tip',
+    'ed_enterprise' => 'ed_enterprise_tip',
+];
+$legendSupport = [
+    'sup_yes'      => 'legend_sup_yes',
+    'sup_no'       => 'legend_sup_no',
+    'sup_extended' => 'sup_extended_tip',
+    'sup_unknown'  => 'sup_unknown_tip',
+];
+$legendColors = ['ok', 'warn', 'crit', 'info', 'muted'];
+$legendTerms = [
+    'term_statusphp' => 'legend_t_statusphp',
+    'term_eol'       => 'legend_t_eol',
+    'term_major'     => 'legend_t_major',
+    'term_approx'    => 'legend_t_approx',
 ];
 
 // Sort ranks (so that sorting a column makes sense).
@@ -92,6 +145,15 @@ function nivmp_error_text(array $r): string
 				<h1 class="site-header__title"><?= h(nivmp_t('title')) ?></h1>
 				<p class="site-header__subtitle"><?= h(nivmp_t('subtitle')) ?></p>
 			</div>
+			<nav class="lang-nav" aria-label="<?= h(nivmp_t('lang_label')) ?>">
+<?php foreach (array_keys($langs) as $code): ?>
+<?php if ($code === $langCode): ?>
+				<span class="lang-nav__current" aria-current="true"><?= h(strtoupper($code)) ?></span>
+<?php else: ?>
+				<a href="?lang=<?= h($code) ?>" hreflang="<?= h($code) ?>" lang="<?= h($code) ?>"><?= h(strtoupper($code)) ?></a>
+<?php endif; ?>
+<?php endforeach; ?>
+			</nav>
 		</div>
 	</header>
 
@@ -195,6 +257,75 @@ function nivmp_error_text(array $r): string
 			</table>
 			<p id="no-results" class="empty" hidden><?= h(nivmp_t('no_results')) ?></p>
 		</div>
+
+		<details class="legend">
+			<summary><?= h(nivmp_t('legend')) ?></summary>
+			<div class="legend__grid">
+				<section class="legend__section">
+					<h2><?= h(nivmp_t('legend_dash')) ?></h2>
+					<dl>
+<?php foreach ($summary as $s): ?>
+						<dt><?= h($s['label']) ?></dt>
+						<dd><?= h(nivmp_t('legend_dash_' . $s['key'])) ?></dd>
+<?php endforeach; ?>
+					</dl>
+				</section>
+				<section class="legend__section">
+					<h2><?= h(nivmp_t('legend_cols')) ?></h2>
+					<dl>
+<?php foreach ($legendCols as $term => $exp): ?>
+						<dt><?= h(nivmp_t($term)) ?></dt>
+						<dd><?= h(nivmp_t($exp)) ?></dd>
+<?php endforeach; ?>
+					</dl>
+				</section>
+				<section class="legend__section">
+					<h2><?= h(nivmp_t('legend_states')) ?></h2>
+					<dl>
+<?php foreach ($legendStates as $term => $exp): ?>
+						<dt><?= h(nivmp_t($term)) ?></dt>
+						<dd><?= h(nivmp_t($exp)) ?></dd>
+<?php endforeach; ?>
+					</dl>
+				</section>
+				<section class="legend__section">
+					<h2><?= h(nivmp_t('legend_editions')) ?></h2>
+					<dl>
+<?php foreach ($legendEditions as $term => $exp): ?>
+						<dt><?= h(nivmp_t($term)) ?></dt>
+						<dd><?= h(nivmp_t($exp)) ?></dd>
+<?php endforeach; ?>
+					</dl>
+				</section>
+				<section class="legend__section">
+					<h2><?= h(nivmp_t('legend_support')) ?></h2>
+					<dl>
+<?php foreach ($legendSupport as $term => $exp): ?>
+						<dt><?= h(nivmp_t($term)) ?></dt>
+						<dd><?= h(nivmp_t($exp)) ?></dd>
+<?php endforeach; ?>
+					</dl>
+				</section>
+				<section class="legend__section">
+					<h2><?= h(nivmp_t('legend_colors')) ?></h2>
+					<dl>
+<?php foreach ($legendColors as $sev): ?>
+						<dt><?= nivmp_badge($sev, nivmp_t('legend_color_' . $sev)) ?></dt>
+						<dd><?= h(nivmp_t('legend_color_' . $sev . '_exp')) ?></dd>
+<?php endforeach; ?>
+					</dl>
+				</section>
+				<section class="legend__section">
+					<h2><?= h(nivmp_t('legend_terms')) ?></h2>
+					<dl>
+<?php foreach ($legendTerms as $term => $exp): ?>
+						<dt><?= h(nivmp_t($term)) ?></dt>
+						<dd><?= h(nivmp_t($exp)) ?></dd>
+<?php endforeach; ?>
+					</dl>
+				</section>
+			</div>
+		</details>
 	</main>
 
 	<footer class="site-footer">
