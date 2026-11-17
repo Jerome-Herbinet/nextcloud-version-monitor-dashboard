@@ -26,9 +26,9 @@ The interface is available in **English, French, Spanish, Italian, German and Po
 
 To add another language, copy one block in `lang.php` and translate it: the legend and the switcher pick it up automatically.
 
-## Demo
+## Screenshot
 
-<https://www.herbinet.fr/NIVMP-demo/>
+<img width="1190" height="1868" alt="FireShot Capture 003 - Nextcloud instances versions monitoring - localhost" src="https://github.com/user-attachments/assets/ad8d4681-156c-47b5-925e-cbab3c7aea23" />
 
 ## Requirements
 
@@ -90,9 +90,24 @@ ownCloud instances are recognised from their product name and shown without supp
 - Data coming from the monitored instances is escaped before display, responses are size-limited, and only `http(s)` is followed.
 - The page sends a strict Content-Security-Policy: inline scripts and styles are not allowed, so keep custom code in `scripts.js` / `styles.css`.
 
-## Development roadmap
+## Possible development roadmap
 
-- JSON output for use with Uptime Kuma, Nagios or Zabbix
+- Password protection
+- Server CRUD
 - Notifications before a support end date
 
 See [CHANGELOG.md](CHANGELOG.md) for what is already done.
+
+## IA
+
+I'm using AI (Mistral) to develop this little app. 
+
+At the very beginning, I worked on it by writing the code manually, but I’m facing several challenges:
+- lack of skills: I was a web developer for quite a few years, but it’s been five years since I stopped, and I’m now “out of touch” with the field—and I’m not ashamed to admit it
+- lack of time: I have plenty of side projects, as well as busy professional and personal lives
+
+Also, I think it’s good for me to experiment with different aspects of AI so I can keep up with the latest trends. 
+
+That said, when I use AI, whether for everyday questions or for coding, I’m critical and vigilant enough to avoid making a (big) mess of things, even though I realize that AI outputs can always be improved (and may sometimes contain errors). 
+
+This kind of small project is perfect for AI-driven development because it’s not a mission-critical program. It simply reads files and displays them visually in a way that’s understandable to the average person.
